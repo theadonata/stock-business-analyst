@@ -15,7 +15,8 @@ warehouse floor.
 - Internal use only (owner + staff), not multi-tenant SaaS.
 - Mobile-first UI needed for stock entry; desktop is fine for reporting.
 - Python backend ecosystem preferred.
-- Self-hosted deployment via Docker on a VPS.
+- Self-hosted deployment on a Kubernetes cluster running on a VPS, with
+  each service built as an independent Docker image.
 - Always-online; no offline support needed for now.
 
 ## Architecture
@@ -28,10 +29,21 @@ API, matching the existing repo split:
   contract for `stock-frontend` and `stock-qa`.
 - **`stock-frontend`**: React + Vite + TypeScript SPA, Tailwind CSS for
   styling, TanStack Query for API data fetching/caching. Built to static
-  files, served behind the reverse proxy. Mobile-first responsive layout.
-- **`stock-infrastructure`**: `docker-compose.yml` running backend,
-  frontend, and PostgreSQL containers on a VPS, with Caddy as a reverse
-  proxy (automatic HTTPS, minimal config).
+  files, served behind the reverse proxy. Single responsive layout serving
+  both mobile and desktop (see UI/UX design below).
+- **`stock-infrastructure`**: Kubernetes manifests (Deployments, Services,
+  Ingress, ConfigMaps/Secrets) targeting a self-hosted k8s cluster on the
+  VPS. `stock-backend` and `stock-frontend` each build and publish their
+  own standalone Docker image independently (no shared `docker-compose.yml`
+  coupling them) — each repo owns a `Dockerfile` and can be built/deployed
+  on its own, consistent with the "no shared code or path dependency"
+  convention across the `stock-*` repos. `stock-infrastructure` references
+  these images by tag and wires them together via k8s manifests (plus an
+  Ingress controller for HTTPS/routing). PostgreSQL runs outside this
+  deployment flow — either an in-cluster StatefulSet or an external
+  managed/self-hosted instance — as its own decision when `stock-infrastructure`
+  is scoped in detail; either way, `stock-backend` only depends on a
+  connection string, not on how Postgres is hosted.
 - **`stock-qa`**: pytest + httpx for API tests (against `stock-backend`),
   Playwright for E2E tests (against the deployed `stock-frontend`). Both
   test suites treat the sibling repos as black boxes, per the existing
@@ -60,6 +72,35 @@ Derived from the six sheets in `Catatan_HPP_Keuangan_Bisnis.xlsx`
 - **Laba Rugi (P&L) is not stored.** It's computed on demand from sales,
   cogs_components, and expenses for a given period, matching the
   spreadsheet's auto-formula sheet.
+
+## UI/UX design (web & mobile)
+
+One responsive React app, not separate mobile/desktop codebases — a single
+set of screens that adapt by viewport, since the same staff may use a phone
+in the warehouse and a laptop for reporting.
+
+- **Layout strategy**: mobile viewport is the default design target (single
+  column, large touch targets, bottom tab/action bar for the most common
+  actions — log sale, stock in/out). Desktop viewport (≥768px) progressively
+  enhances the same screens with a persistent sidebar nav and denser tables,
+  rather than a different layout tree.
+- **Navigation**: bottom nav bar on mobile (Dashboard, Sales, Stock,
+  Expenses, Reports); collapses into a left sidebar on desktop. Avoids
+  hidden hamburger-only nav for the handful of core sections staff use daily.
+- **Data entry screens** (sales, stock in/out, expenses): single-column
+  forms, numeric keypad input types for quantities/amounts, large tap
+  targets (≥44px), minimal required fields per screen — optimized for quick
+  one-handed entry on the warehouse floor.
+- **Reporting screens** (P&L, inventory value, stock ledger): tables that
+  collapse into stacked cards on mobile (one card per row) and render as
+  full tables on desktop, rather than forcing horizontal scroll on a phone.
+- **Component approach**: Tailwind CSS with a small shared component set
+  (buttons, inputs, cards, tables-that-become-cards) built once and reused
+  across screens, so responsiveness is handled at the component level
+  instead of per-page.
+- **Accessibility baseline**: sufficient color contrast, form labels tied to
+  inputs, focus states visible — standard practice, not a separate a11y
+  workstream.
 
 ## Auth & access
 
