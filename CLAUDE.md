@@ -35,6 +35,18 @@ Do not commit changes in this repo automatically — even when using
 atomic-commit or similar workflows. Only commit when the user explicitly
 asks for it.
 
+## GitHub operations
+
+Prefer the GitHub MCP server (configured in `.mcp.json`) over raw
+`git push` / `gh` / GitHub REST calls for anything that talks to GitHub
+itself — opening PRs, commenting, managing issues, etc. It authenticates
+directly and needs fewer manual permission approvals than shell-level
+push/curl commands. Local-only git operations (branching, committing)
+stay as plain git commands; only the GitHub-facing calls should route
+through the MCP tools when the server is connected in the session. If
+the MCP server isn't available, fall back to `git push` / `gh` and say
+so, rather than silently skipping the step.
+
 ## Code style
 
 Always put comments in code so it is understandable by a human reader —
