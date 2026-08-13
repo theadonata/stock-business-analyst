@@ -50,6 +50,25 @@ new env var is needed, add it straight to `.env.local` (with a comment
 explaining it) rather than adding a separate example file for someone to
 copy from.
 
+## Summarizing work
+
+Always route end-of-task summaries into the appropriate existing file in
+this repo instead of only stating them in chat — future sessions read
+these files for context, chat history doesn't persist:
+
+- **`findings.md`** — results of a review/audit/investigation (e.g.
+  security review, code review, research pass). Append as a new dated
+  section; don't overwrite prior entries.
+- **`instructions.md`** — step-by-step how-to material (e.g. how to run,
+  test, or deploy something). Update the relevant section, or add a new
+  one if it's a new procedure.
+- **`questions.md`** — open questions, scope decisions made without
+  asking, or anything that needs the user's confirmation later. Append as
+  a new dated section.
+
+If a summary doesn't fit any of the three, ask which file it belongs in
+(or whether it needs a new file) rather than skipping the write-up.
+
 ## Gitignore
 
 Always ensure a `.gitignore` exists in this repo — never let it be
