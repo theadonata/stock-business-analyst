@@ -35,6 +35,11 @@ Do not commit changes in this repo automatically — even when using
 atomic-commit or similar workflows. Only commit when the user explicitly
 asks for it.
 
+Never push directly to the `main` branch, even when explicitly asked to
+"push" or "commit and push" — `main` is protected and requires a pull
+request. Always push to a new branch and open a PR instead, across all
+five `stock-*` repos.
+
 ## GitHub operations
 
 Prefer the GitHub MCP server (configured in `.mcp.json`) over raw
