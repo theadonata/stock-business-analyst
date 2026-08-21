@@ -47,13 +47,15 @@ listed there for before any real (non-local) deployment.
 
 - Do you want CI (GitHub Actions or similar) wired up in
   `stock-infrastructure` or per-repo now, or is that a later pass?
-- From the 2026-08-12 Kubernetes deployability/scalability assessment
-  (`stock-infrastructure/infrastructure.md`), three open infra decisions:
-  - Cloud provider vs. bare VPS, and which k8s distribution (k3s, kubeadm,
-    etc.) — nothing chosen yet.
-  - Postgres hosting: in-cluster StatefulSet+PVC vs. an external
-    managed/self-hosted instance.
-  - Frontend backend-URL binding: accept a separate Docker build per
-    environment (simplest), or build a runtime env-injection mechanism
-    (nginx `envsubst` + a fetched `/config.js`) so one image can be
-    promoted across environments.
+  (Update: this has since been done — see
+  `stock-infrastructure/docs/adr/0002-gitops-deployment-architecture.md`.)
+- ~~From the 2026-08-12 Kubernetes deployability/scalability assessment
+  (`stock-infrastructure/infrastructure.md`), three open infra decisions~~
+  — **resolved**, see
+  `stock-infrastructure/docs/adr/0002-gitops-deployment-architecture.md`:
+  k3s was chosen as the k8s distribution; Postgres runs as an in-cluster
+  StatefulSet using `stock-backend`'s own custom image; the frontend's
+  backend-URL binding was fixed with a runtime env-injection mechanism
+  (nginx `envsubst` + a fetched `/config.js`), not a separate build per
+  environment. `stock-infrastructure/infrastructure.md` itself has since
+  been deleted — its content is distilled into that ADR.
